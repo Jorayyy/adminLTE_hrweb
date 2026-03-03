@@ -254,7 +254,7 @@
               <a class="dropdown-item" href="#"><i class="far fa-copy"></i> Plot Schedule</a>
               <a class="dropdown-item" href="<?= $base_url ?>pages/payroll_period.php"><i class="far fa-copy"></i> Payroll Period</a>
               <a class="dropdown-item" href="#"><i class="far fa-copy"></i> Manual Upload Attendance</a>
-              <a class="dropdown-item" href="#"><i class="far fa-copy"></i> View Attendance</a>
+              <a class="dropdown-item" href="<?= $base_url ?>pages/view_attendance.php"><i class="far fa-copy"></i> View Attendance</a>
               <a class="dropdown-item" href="#"><i class="far fa-copy"></i> Fixed Schedule</a>
               <a class="dropdown-item" href="#"><i class="far fa-copy"></i> Flexi Schedule</a>
               <a class="dropdown-item" href="#"><i class="far fa-copy"></i> Compress Work Schedule</a>

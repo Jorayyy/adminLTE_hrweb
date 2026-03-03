@@ -220,39 +220,54 @@ try {
                   </thead>
                   <tbody>
                     <?php
-                    $periods = [
-                        ['CEBU WEEKLY GROUP', 'Weekly', '1st cut off', '1342', 'December 22 2025 to December 28 2025', '0', '2026', 'January', '7', 'January 03 2026', '1st cut off'],
-                        ['CEBU WEEKLY GROUP', 'Weekly', '2nd cut off', '1347', 'December 29 2025 to January 04 2026', '0', '2026', 'January', '7', 'January 10 2026', '2nd cut off'],
-                        ['CEBU WEEKLY GROUP', 'Weekly', '3rd cut off', '1352', 'January 05 2026 to January 11 2026', '0', '2026', 'January', '7', 'January 17 2026', '3rd cut off'],
-                        ['CEBU WEEKLY GROUP', 'Weekly', '4th cut off', '1358', 'January 12 2026 to January 18 2026', '0', '2026', 'January', '7', 'January 24 2026', '4th cut off'],
-                        ['CEBU WEEKLY GROUP', 'Weekly', '5th cut off', '1363', 'January 19 2026 to January 25 2026', '0', '2026', 'January', '7', 'January 31 2026', '5th cut off'],
-                        ['CEBU WEEKLY GROUP', 'Weekly', '1st cut off', '1369', 'January 26 2026 to February 01 2026', '0', '2026', 'February', '7', 'February 07 2026', '1st cut off'],
-                    ];
+                    // Fetch existing periods from database
+                    try {
+                        $periods_stmt = $conn->query("
+                            SELECT p.*, g.group_name 
+                            FROM payroll_periods p 
+                            JOIN payroll_period_groups g ON p.group_id = g.id 
+                            ORDER BY p.date_from DESC
+                        ");
+                        $db_periods = $periods_stmt->fetchAll();
+                    } catch (PDOException $e) {
+                        $db_periods = [];
+                    }
 
-                    foreach($periods as $p):
+                    if (!empty($db_periods)) {
+                        foreach($db_periods as $p):
                     ?>
                     <tr>
-                      <td><?= $p[0] ?></td>
-                      <td><?= $p[1] ?></td>
-                      <td><?= $p[2] ?></td>
+                      <td><?= htmlspecialchars($p['group_name']) ?></td>
+                      <td>Weekly</td> <!-- Default or from DB if added -->
+                      <td><?= htmlspecialchars($p['cut_off_day'] ?? 'N/A') ?></td>
                       <td>
-                        <span class="text-danger">Payroll Period ID: <?= $p[3] ?></span><br>
-                        <?= $p[4] ?>
+                        <span class="text-danger">Payroll Period ID: <?= $p['id'] ?></span><br>
+                        <?= date('F d Y', strtotime($p['date_from'])) ?> to <?= date('F d Y', strtotime($p['date_to'])) ?>
                       </td>
-                      <td><?= $p[5] ?></td>
+                      <td><?= htmlspecialchars($p['cut_off_day'] ?? '0') ?></td>
                       <td>
-                        year cover: <?= $p[6] ?><br>
-                        month cover: <?= $p[7] ?>
+                        year cover: <?= htmlspecialchars($p['cover_year']) ?><br>
+                        month cover: <?= htmlspecialchars($p['cover_month']) ?>
                       </td>
-                      <td><?= $p[8] ?></td>
-                      <td><?= $p[9] ?></td>
-                      <td><?= $p[10] ?></td>
+                      <td>
+                        <?php 
+                           $diff = strtotime($p['date_to']) - strtotime($p['date_from']);
+                           echo round($diff / (60 * 60 * 24)) + 1;
+                        ?>
+                      </td>
+                      <td><?= !empty($p['pay_date']) ? date('F d Y', strtotime($p['pay_date'])) : 'N/A' ?></td>
+                      <td><?= htmlspecialchars($p['description'] ?? '') ?></td>
                       <td class="text-center">
                         <a href="javascript:void(0)" class="text-primary mr-2" style="font-size: 16px;"><i class="fas fa-trash text-purple" style="color: #9c27b0 !important;"></i></a>
                         <a href="javascript:void(0)" onclick="openPayrollEdit()" class="text-warning" style="font-size: 16px;"><i class="fas fa-pencil-alt" style="color: #ffc107 !important;"></i></a>
                       </td>
                     </tr>
-                    <?php endforeach; ?>
+                    <?php 
+                        endforeach; 
+                    } else {
+                    ?>
+                    <tr><td colspan="10" class="text-center">No payroll periods found.</td></tr>
+                    <?php } ?>
                   </tbody>
                 </table>
               </div>
@@ -369,122 +384,124 @@ try {
         <!-- Add Payroll Period Interface -->
         <div id="add-payroll-container" class="card mb-4" style="border-radius: 4px; border: none; box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2); display: none;">
             <div class="card-body p-4">
-                <div class="mb-4 d-flex justify-content-between align-items-center">
-                    <div style="font-size: 14px;">
-                        <i class="fas fa-info-circle text-dark"></i> <span class="font-weight-bold">Mancao Electronic Connect Business Solutions OPC</span> <i class="fas fa-arrow-right mx-1"></i> <span class="font-weight-bold">Create New Payroll Period</span>
+                <form id="add-payroll-form">
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div style="font-size: 14px;">
+                            <i class="fas fa-info-circle text-dark"></i> <span class="font-weight-bold">Mancao Electronic Connect Business Solutions OPC</span> <i class="fas fa-arrow-right mx-1"></i> <span class="font-weight-bold">Create New Payroll Period</span>
+                        </div>
+                        <button type="button" class="btn btn-tool" onclick="hideAddPayroll()" style="color: #6c757d; font-size: 20px;">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-tool" onclick="hideAddPayroll()" style="color: #6c757d; font-size: 20px;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Pay Type<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Pay Type<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select name="pay_type" class="form-control form-control-sm" required>
+                                <option selected disabled>Select Pay Type</option>
+                                <option>Weekly</option>
+                                <option>Semi-Monthly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <select class="form-control form-control-sm">
-                            <option selected disabled>Select Pay Type</option>
-                            <option>Weekly</option>
-                            <option>Semi-Monthly</option>
-                            <option>Monthly</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Date From<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Date From<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="date" name="date_from" class="form-control form-control-sm" required>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <input type="date" class="form-control form-control-sm">
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Date To<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Date To<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="date" name="date_to" class="form-control form-control-sm" required>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <input type="date" class="form-control form-control-sm">
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cover Month<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cover Month<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select name="cover_month" class="form-control form-control-sm" required>
+                                <option selected disabled>Select (make sure this is correct.)</option>
+                                <?php 
+                                $months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                                foreach($months as $m) echo "<option value='$m'>$m</option>"; 
+                                ?>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <select class="form-control form-control-sm">
-                            <option selected disabled>Select (make sure this is correct.)</option>
-                            <?php 
-                            $months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                            foreach($months as $m) echo "<option>$m</option>"; 
-                            ?>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cover Year<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cover Year<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select name="cover_year" class="form-control form-control-sm" required>
+                                <option selected disabled>Select (make sure this is correct.)</option>
+                                <option>2024</option>
+                                <option>2025</option>
+                                <option>2026</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <select class="form-control form-control-sm">
-                            <option selected disabled>Select (make sure this is correct.)</option>
-                            <option>2024</option>
-                            <option>2025</option>
-                            <option>2026</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Employee Group<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Employee Group<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select name="group_id" class="form-control form-control-sm" required>
+                                <option selected disabled>Select Group</option>
+                                <?php foreach($db_groups as $g): ?>
+                                <option value="<?= $g['id'] ?>"><?= $g['group_name'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <select class="form-control form-control-sm">
-                            <option selected disabled>Select Group</option>
-                            <?php foreach($db_groups as $g): ?>
-                            <option value="<?= $g['id'] ?>"><?= $g['group_name'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cut-Off Day<span class="text-danger">*</span></label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Cut-Off Day<span class="text-danger">*</span></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" name="cut_off_day" class="form-control form-control-sm" placeholder="" required>
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control form-control-sm" placeholder="">
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Pay Date</label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Pay Date</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="date" name="pay_date" class="form-control form-control-sm">
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <input type="date" class="form-control form-control-sm">
-                    </div>
-                </div>
 
-                <div class="row mb-3 align-items-center">
-                    <div class="col-sm-3">
-                        <label class="mb-0 font-weight-bold" style="font-size: 13px;">Description</label>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-3">
+                            <label class="mb-0 font-weight-bold" style="font-size: 13px;">Description</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" name="description" class="form-control form-control-sm" placeholder="Description">
+                        </div>
                     </div>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control form-control-sm" placeholder="Description">
-                    </div>
-                </div>
 
-                <div class="d-flex justify-content-end mt-4">
-                    <button class="btn btn-danger btn-sm px-3 py-1" style="background-color: #d9534f; border-color: #d43f3a; border-radius: 4px;">
-                        <i class="fas fa-save mr-1"></i> Save
-                    </button>
-                </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-danger btn-sm px-3 py-1" style="background-color: #d9534f; border-color: #d43f3a; border-radius: 4px;">
+                            <i class="fas fa-save mr-1"></i> Save
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
       </div>
@@ -544,6 +561,10 @@ try {
     </div>
 </div>
 
+<script src="<?= $base_url ?>assets/js/jquery.min.js"></script>
+<script src="<?= $base_url ?>assets/js/bootstrap.bundle.min.js"></script>
+<script src="<?= $base_url ?>assets/js/adminlte.min.js"></script>
+
 <script>
 function showEmployeeList() {
     $('#employee-list-modal').fadeIn(200);
@@ -595,6 +616,39 @@ function hideAddGroupForm() {
     $('#add-group-form').hide();
     $('#manage-groups-table').show();
 }
+
+$(document).ready(function() {
+    console.log("Document ready - Payroll Period page");
+    
+    $('#add-payroll-form').on('submit', function(e) {
+        e.preventDefault();
+        console.log("Form submit triggered");
+        const formData = $(this).serialize();
+        console.log("Data to send:", formData);
+        
+        $.ajax({
+            url: 'save_payroll.php',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                console.log("Raw response:", response);
+                if (response.status === 'success') {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred while saving. Please check the console.');
+                console.error("AJAX Error Status:", status);
+                console.error("AJAX Error:", error);
+                console.error("Server Response:", xhr.responseText);
+            }
+        });
+    });
+});
 </script>
 
 <?php include '../includes/footer.php'; ?>

@@ -63,6 +63,25 @@
               <p style="color: #6c757d;">Employee Masterlist</p>
             </a>
           </li>
+
+          <!-- Time Section -->
+          <li class="nav-header" style="background-color: #f1c40f; color: white; padding: 10px 15px; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; cursor: default;">
+            <i class="fas fa-clock mr-2"></i> Time
+          </li>
+          
+          <li class="nav-item">
+            <a href="<?= (strpos($_SERVER['PHP_SELF'], 'pages/') !== false) ? '' : 'pages/' ?>view_attendance.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'view_attendance.php') ? 'active' : '' ?>">
+              <i class="nav-icon far fa-copy" style="color: #17a2b8;"></i>
+              <p style="color: #17a2b8;">View Attendance</p>
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a href="<?= (strpos($_SERVER['PHP_SELF'], 'pages/') !== false) ? '' : 'pages/' ?>dtr.php" class="nav-link <?= (basename($_SERVER['PHP_SELF']) == 'dtr.php') ? 'active' : '' ?>">
+              <i class="nav-icon far fa-clock" style="color: #e83e8c;"></i>
+              <p style="color: #e83e8c;">Daily Time Record</p>
+            </a>
+          </li>
           <!-- Add more items as we progress -->
         </ul>
       </nav>
