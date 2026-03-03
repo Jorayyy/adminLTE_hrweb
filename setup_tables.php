@@ -76,6 +76,11 @@ if ($driver === 'mysql' || $driver === 'mariadb') {
             UNIQUE(employee_id, group_id),
             FOREIGN KEY(employee_id) REFERENCES employees(id_number) ON DELETE CASCADE,
             FOREIGN KEY(group_id) REFERENCES payroll_period_groups(id) ON DELETE CASCADE
+        )",
+        "CREATE TABLE IF NOT EXISTS reminders (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )"
     ];
 } else {
@@ -88,7 +93,8 @@ if ($driver === 'mysql' || $driver === 'mariadb') {
         "CREATE TABLE IF NOT EXISTS employees_extended (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_id TEXT UNIQUE NOT NULL, company TEXT, position TEXT, location TEXT, section TEXT)",
         "CREATE TABLE IF NOT EXISTS payroll_period_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, pay_type TEXT NOT NULL, group_name TEXT NOT NULL, description TEXT, status TEXT DEFAULT 'active', is_on INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE IF NOT EXISTS payroll_periods (id INTEGER PRIMARY KEY AUTOINCREMENT, group_id INTEGER NOT NULL, cut_off TEXT, date_from DATE NOT NULL, date_to DATE NOT NULL, cut_off_day INTEGER, cover_year INTEGER, cover_month TEXT, no_of_days INTEGER, pay_date DATE, description TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(group_id) REFERENCES payroll_period_groups(id))",
-        "CREATE TABLE IF NOT EXISTS employee_group_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_id TEXT NOT NULL, group_id INTEGER NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(employee_id, group_id), FOREIGN KEY(employee_id) REFERENCES employees(id_number), FOREIGN KEY(group_id) REFERENCES payroll_period_groups(id))"
+        "CREATE TABLE IF NOT EXISTS employee_group_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_id TEXT NOT NULL, group_id INTEGER NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(employee_id, group_id), FOREIGN KEY(employee_id) REFERENCES employees(id_number), FOREIGN KEY(group_id) REFERENCES payroll_period_groups(id))",
+        "CREATE TABLE IF NOT EXISTS reminders (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
     ];
 }
 
