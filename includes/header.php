@@ -168,7 +168,7 @@
               NO LOGO
           </div>
           <div class="dropdown">
-            <a href="#" class="p-0 d-flex align-items-center dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-decoration: none;">
+            <a href="#" class="p-0 d-flex align-items-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-decoration: none;">
                 <div class="user-img d-flex align-items-center justify-content-center bg-info text-white" style="height: 55px; width: 55px; border-radius: 50%; border: 2px solid #17a2b8; font-size: 20px;">
                     <i class="fas fa-user"></i>
                 </div>
