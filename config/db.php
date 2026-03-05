@@ -15,8 +15,8 @@ if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'mebshiyas.com
 // 2. Check if running in terminal (CLI) on the Hostinger server
 else if (php_sapi_name() === 'cli') {
     $uname = php_uname('n'); // Get hostname
-    // On Hostinger, hostname usually contains 'sg-nme' or similar as seen in your prompt
-    if (strpos($uname, 'sg-nme') !== false || file_exists('/home/u502373859')) {
+    // Added 'web477' which I see in your terminal screenshot
+    if (strpos($uname, 'sg-nme') !== false || strpos($uname, 'web477') !== false || file_exists('/home/u502373859')) {
         $is_live = true;
     }
 }
