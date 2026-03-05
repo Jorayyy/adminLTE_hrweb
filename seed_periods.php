@@ -33,7 +33,17 @@ try {
     $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220045', 1)"); // RESOS
     $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220064', 1)"); // ORAG
     
-    echo "[3/3] Employee group assignments completed.\n";
+    // 4. Seed Mock Attendance for display in DTR
+    $attendance = [
+        ['220001', '2026-02-23', '20:55:00', '07:05:00'],
+        ['220001', '2026-02-24', '21:02:00', '07:00:00'],
+        ['220001', '2026-02-25', '20:45:00', '07:15:00']
+    ];
+    foreach($attendance as $a) {
+        $conn->prepare("INSERT IGNORE INTO attendance (employee_id, date, time_in, time_out, absent) VALUES (?, ?, ?, ?, 0)")->execute($a);
+    }
+
+    echo "[3/3] Employee group assignments completed & mock logs seeded.\n";
 
     $conn->commit();
     echo "\n✔ PERIOD SEEDING COMPLETED SUCCESSFULLY.\n";

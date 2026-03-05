@@ -97,9 +97,12 @@ $emp_basic = $emp_basic_stmt->fetch();
                 <label>Payroll Period</label>
                 <select name="period_id" class="form-control-custom" onchange="this.form.submit()">
                     <option value="">Select Payroll Period</option>
+                    <?php if (empty($periods)): ?>
+                        <option disabled>No periods available for your group</option>
+                    <?php endif; ?>
                     <?php foreach ($periods as $p): ?>
                         <option value="<?= $p['id'] ?>" <?= $selected_period_id == $p['id'] ? 'selected' : '' ?>>
-                            <?= date('F d Y', strtotime($p['date_from'])) ?> to <?= date('F d Y', strtotime($p['date_to'])) ?> (Paydate:<?= $p['pay_date'] ?>)
+                            <?= date('F d, Y', strtotime($p['date_from'])) ?> to <?= date('F d, Y', strtotime($p['date_to'])) ?> (Paydate: <?= date('M d, Y', strtotime($p['pay_date'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
