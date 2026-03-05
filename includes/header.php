@@ -87,6 +87,9 @@
     /* User Profile Dropdown Z-index */
     .user-profile-dropdown {
       z-index: 2000 !important;
+      position: absolute !important;
+      right: 0 !important;
+      left: auto !important;
     }
 
     /* Colors from Reference */
