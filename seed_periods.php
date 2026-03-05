@@ -11,6 +11,22 @@ echo "--- Seeding Payroll Periods and Group Assignments ---\n";
 try {
     $conn->beginTransaction();
 
+    // 0. Ensure Attendance Table exists (Live fix)
+    $conn->exec("CREATE TABLE IF NOT EXISTS attendance (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        employee_id VARCHAR(100) NOT NULL,
+        date DATE,
+        time_in TIME,
+        time_out TIME,
+        punch_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+        punch_type VARCHAR(50),
+        absent INT DEFAULT 0,
+        tardiness_mins INT DEFAULT 0,
+        overtime_hrs FLOAT DEFAULT 0,
+        INDEX(employee_id)
+    )");
+    echo "[0/3] Attendance table verified.\n";
+
     // 1. Ensure the Payroll Group exists (ID 1)
     $conn->exec("INSERT IGNORE INTO payroll_period_groups (id, pay_type, group_name, is_on) 
                  VALUES (1, 'Weekly', 'TACLOBAN ADMIN', 1)");
