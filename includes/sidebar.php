@@ -82,6 +82,12 @@
               <p style="color: #e83e8c;">Daily Time Record</p>
             </a>
           </li>
+          <li class="nav-item border-top mt-2 pt-2">
+            <a href="<?= (strpos($_SERVER['PHP_SELF'], 'pages/') !== false) ? '../' : '' ?>logout.php" class="nav-link text-danger">
+              <i class="nav-icon fas fa-sign-out-alt"></i>
+              <p>Log Out</p>
+            </a>
+          </li>
           <!-- Add more items as we progress -->
         </ul>
       </nav>

@@ -91,6 +91,9 @@ $base_url = "../../";
       </div>
       <div class="profile-info">
           <span class="user-name"><?= $_SESSION['emp_fullname'] ?></span>
+          <a href="../../logout.php" class="btn btn-sm btn-danger ml-2" style="font-size: 10px; font-weight: bold;">
+              <i class="fas fa-sign-out-alt"></i> LOGOUT
+          </a>
       </div>
   </div>
 

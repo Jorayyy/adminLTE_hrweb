@@ -176,7 +176,7 @@
                 <i class="fas fa-caret-down caret-blue"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right user-profile-dropdown shadow-sm" aria-labelledby="userProfileDropdown">
-                <a class="dropdown-item" href="logout.php">Sign out</a>
+                <a class="dropdown-item" href="<?= (strpos($_SERVER['PHP_SELF'], 'pages/') !== false) ? '../logout.php' : 'logout.php' ?>">Sign out</a>
                 <a class="dropdown-item" href="#">Change Password</a>
                 <a class="dropdown-item" href="#">Quick Links Maintenance</a>
                 <a class="dropdown-item" href="#">System Help & Quick Links Settings</a>
