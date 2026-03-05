@@ -28,6 +28,8 @@ try {
     $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('222065', 1)");
     
     // IDs from your batch imports
+    $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220001', 1)"); // RIZA BUBA
+    $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220163', 1)"); // CRISTINE CAJES
     $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220045', 1)"); // RESOS
     $conn->exec("INSERT IGNORE INTO employee_group_assignments (employee_id, group_id) VALUES ('220064', 1)"); // ORAG
     
