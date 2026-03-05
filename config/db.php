@@ -1,16 +1,24 @@
 <?php
-// Database configuration
-// Local:
-$host = 'localhost';
-$db   = 'mebs_hris';
-$user = 'root';
-$pass = '';
+/**
+ * Database configuration
+ * Automatically detects if running on Local or Live Hostinger server
+ */
 
-// For Hostinger:
-// $host = 'localhost';
-// $db   = 'u123456789_hris';
-// $user = 'u123456789_user';
-// $pass = 'your_hostinger_password';
+$is_hottinger = (strpos($_SERVER['HTTP_HOST'], 'mebshiyas.com') !== false);
+
+if ($is_hottinger) {
+    // For Hostinger Live:
+    $host = 'localhost';
+    $db   = 'u502373859_mebs';
+    $user = 'u502373859_hiyas';
+    $pass = 'Mjaa050501';
+} else {
+    // Local Environment:
+    $host = 'localhost';
+    $db   = 'mebs_hris';
+    $user = 'root';
+    $pass = '';
+}
 
 try {
     $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
