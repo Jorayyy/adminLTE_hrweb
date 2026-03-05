@@ -2,11 +2,26 @@
 /**
  * Database configuration
  * Automatically detects if running on Local or Live Hostinger server
+ * Works for both Browser (HTTP) and Terminal (SSH/CLI)
  */
 
-$is_hottinger = (strpos($_SERVER['HTTP_HOST'], 'mebshiyas.com') !== false);
+// Detect environment
+$is_live = false;
 
-if ($is_hottinger) {
+// 1. Check if running in browser
+if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'mebshiyas.com') !== false) {
+    $is_live = true;
+} 
+// 2. Check if running in terminal (CLI) on the Hostinger server
+else if (php_sapi_name() === 'cli') {
+    $uname = php_uname('n'); // Get hostname
+    // On Hostinger, hostname usually contains 'sg-nme' or similar as seen in your prompt
+    if (strpos($uname, 'sg-nme') !== false || file_exists('/home/u502373859')) {
+        $is_live = true;
+    }
+}
+
+if ($is_live) {
     // For Hostinger Live:
     $host = 'localhost';
     $db   = 'u502373859_mebs';
