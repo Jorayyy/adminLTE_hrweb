@@ -34,24 +34,59 @@ if (!empty($selected_period_id)) {
     $period_info = $p_stmt->fetch();
 
     if ($period_info) {
-        // MOCK DATA for the payslip (as database tables for calculations are not yet available)
-        // Values based on the provided screenshot for 'Regular Payroll'
+        $date_from = $period_info['date_from'];
+        $date_to = $period_info['date_to'];
+
+        // FETCH REAL DATA
+        // Calculate Total Working Hours / Days from attendance
+        // Note: For now, we'll sum hours based on Time IN and Time OUT pairs.
+        // We'll also calculate a base salary if we have a rate (using 5000 as base if none exists for demo)
+        
+        $att_stmt = $conn->prepare("
+            SELECT punch_type, punch_time 
+            FROM attendance 
+            WHERE employee_id = ? 
+            AND punch_time BETWEEN ? AND ? 
+            ORDER BY punch_time ASC
+        ");
+        $att_stmt->execute([$emp_id_number, $date_from . ' 00:00:00', $date_to . ' 23:59:59']);
+        $logs = $att_stmt->fetchAll();
+
+        $total_minutes = 0;
+        $last_in = null;
+
+        foreach ($logs as $log) {
+            if ($log['punch_type'] === 'Time IN') {
+                $last_in = strtotime($log['punch_time']);
+            } elseif ($log['punch_type'] === 'Time OUT' && $last_in) {
+                $total_minutes += (strtotime($log['punch_time']) - $last_in) / 60;
+                $last_in = null;
+            }
+        }
+
+        $total_hours = round($total_minutes / 60, 2);
+        
+        // Simple mock rate calculation (e.g., 500 per 8-hour day -> 62.5 per hour)
+        $hourly_rate = 62.5; 
+        $base_salary = round($total_hours * $hourly_rate, 2);
+
+        // Adjust mock values based on attendance
         $payslip_data = [
             'period_desc' => $period_info['group_name'] . ' (' . date('M d, Y', strtotime($period_info['date_from'])) . ' - ' . date('M d, Y', strtotime($period_info['date_to'])) . ')',
             'pay_date' => date('M d, Y', strtotime($period_info['pay_date'])),
             'earnings' => [
-                ['label' => 'SALARY / LEAVE PAY', 'amount' => 5000.00],
-                ['label' => 'ALLOWANCE', 'amount' => 1200.00],
-                ['label' => 'OVERTIME', 'amount' => 450.75],
-                ['label' => 'NIGHT DIFF', 'amount' => 120.50],
+                ['label' => 'SALARY / LEAVE PAY (' . $total_hours . ' hrs)', 'amount' => $base_salary],
+                ['label' => 'ALLOWANCE', 'amount' => ($total_hours > 0 ? 1200.00 : 0.00)],
+                ['label' => 'OVERTIME', 'amount' => 0.00],
+                ['label' => 'NIGHT DIFF', 'amount' => 0.00],
                 ['label' => 'HOLIDAY PAY', 'amount' => 0.00],
             ],
             'deductions' => [
-                ['label' => 'SSS CONTRIBUTION', 'amount' => 450.00],
-                ['label' => 'PHILHEALTH', 'amount' => 200.00],
-                ['label' => 'PAG-IBIG', 'amount' => 100.00],
-                ['label' => 'WITHHOLDING TAX', 'amount' => 345.20],
-                ['label' => 'LATE / UNDERSPELL', 'amount' => 85.00],
+                ['label' => 'SSS CONTRIBUTION', 'amount' => ($total_hours > 0 ? 450.00 : 0.00)],
+                ['label' => 'PHILHEALTH', 'amount' => ($total_hours > 0 ? 200.00 : 0.00)],
+                ['label' => 'PAG-IBIG', 'amount' => ($total_hours > 0 ? 100.00 : 0.00)],
+                ['label' => 'WITHHOLDING TAX', 'amount' => ($total_hours > 0 ? 345.20 : 0.00)],
+                ['label' => 'LATE / UNDERSPELL', 'amount' => 0.00],
                 ['label' => 'SSS LOAN', 'amount' => 0.00],
                 ['label' => 'PAG-IBIG LOAN', 'amount' => 0.00],
             ],
